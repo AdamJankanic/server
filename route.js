@@ -43,9 +43,9 @@ const { checkEmailDupe, checkDomain, checkToken } = require("./middlewares");
 // router.get("/user/logout/:uuid", logout);
 // router.get("/user/refresh", refreshToken);
 
-// router.get("/testik", (req, res) => {
-//   res.send("testik");
-// });
+router.get("/testik", (req, res) => {
+  res.send("testik");
+});
 
 // /*chat*/
 // // router.post("/chat/create", createChat);

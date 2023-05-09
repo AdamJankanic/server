@@ -48,7 +48,7 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-app.use("/api", appRoute);
+// app.use("/api", appRoute);
 
 async function main() {
   await sequelize.sync({ alter: true });

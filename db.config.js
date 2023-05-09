@@ -1,4 +1,5 @@
 const { Sequelize, Model, DataTypes } = require("sequelize");
+import pg from 'pg';
 const logger = require('../logger/api.logger');
 
 const connect = () => {
@@ -11,7 +12,7 @@ const connect = () => {
 
     const sequelize = new Sequelize(database, userName, password, {
         host: hostName,
-        dialect: dialect,
+        dialectModule: pg,
         operatorsAliases: false,
         pool: {
             max: 10,

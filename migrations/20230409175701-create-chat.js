@@ -14,11 +14,11 @@ module.exports = {
       offer_uuid: {
         type: Sequelize.UUID,
       },
-      createdAt: {
+      createdat: {
         allowNull: false,
         type: Sequelize.DATE,
       },
-      updatedAt: {
+      updatedat: {
         allowNull: false,
         type: Sequelize.DATE,
       },

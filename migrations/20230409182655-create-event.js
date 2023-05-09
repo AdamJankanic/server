@@ -54,11 +54,11 @@ module.exports = {
         type: Sequelize.DATE,
         allowNull: false,
       },
-      createdAt: {
+      createdat: {
         allowNull: false,
         type: Sequelize.DATE,
       },
-      updatedAt: {
+      updatedat: {
         allowNull: false,
         type: Sequelize.DATE,
       },

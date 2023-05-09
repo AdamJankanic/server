@@ -15,9 +15,9 @@
   },
   "production": {
     "username": "postgres",
-    "password": "fiitstu",
-    "database": "bakalarka",
-    "host": "0.0.0.0",
+    "password": "giX5EQ6zd1a3QiOpcYws",
+    "database": "railway",
+    "host": "containers-us-west-1.railway.app",
     "dialect": "postgres"
   }
 }

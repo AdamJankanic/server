@@ -11,8 +11,7 @@ const connect = () => {
 
   const sequelize = new Sequelize(database, userName, password, {
     host: hostName,
-    dialect: "mysql",
-    dialectModule: mysql2,
+    dialect: dialect,
     operatorsAliases: false,
     pool: {
       max: 10,

@@ -11,6 +11,10 @@ async function initializeWebSocket(server) {
 
   //create namespace for each chat from chat table
   const chats = await Chat.findAll();
+  if (!chats) {
+    console.log("No chats found");
+    return;
+  }
   const chatUuids = chats.map((chat) => chat.uuid);
   console.log(chatUuids);
 

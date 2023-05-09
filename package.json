@@ -1,0 +1,26 @@
+{
+  "name": "bakalarka",
+  "version": "1.0.0",
+  "description": "Webova aplikacia na ulahcenie zivota studentov na internate",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "HTTPS=true SSL_CRT_FILE=localhost.pem SSL_KEY_FILE=localhost-key.pem react-scripts start"
+  },
+  "author": "Adam Jankanic",
+  "license": "ISC",
+  "dependencies": {
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "https": "^1.0.0",
+    "jsonwebtoken": "^9.0.0",
+    "nodemailer": "^6.9.1",
+    "pg": "^8.9.0",
+    "pg-hstore": "^2.3.4",
+    "pg-promise": "^11.2.0",
+    "sequelize": "^6.28.2",
+    "socket.io": "^4.6.1"
+  }
+}

@@ -22,6 +22,11 @@ const connect = () => {
     },
   });
 
+  if (options.dialect === "mysql") {
+    options.dialectModule = mysql2;
+  }
+  new Sequelize(options);
+
   const db = {};
   db.Sequelize = Sequelize;
   db.sequelize = sequelize;

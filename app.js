@@ -53,6 +53,7 @@ app.get("/", (req, res) => {
 async function main() {
   await sequelize.sync({ alter: true });
   console.log("Database & tables created!");
+  console.log("Everything is ready!");
 }
 
 main();

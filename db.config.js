@@ -10,17 +10,21 @@ const connect = () => {
   const dialect = process.env.DIALECT;
   const port = process.env.PORT;
 
-  const sequelize = new Sequelize(database, userName, password, {
-    host: hostName,
-    dialect: dialect,
-    port: port,
-    operatorsAliases: false,
-    pool: {
-      max: 10,
-      min: 0,
-      acquire: 20000,
-      idle: 5000,
-    },
+  //   const sequelize = new Sequelize(database, userName, password, {
+  //     host: hostName,
+  //     dialect: dialect,
+  //     port: port,
+  //     operatorsAliases: false,
+  //     pool: {
+  //       max: 10,
+  //       min: 0,
+  //       acquire: 20000,
+  //       idle: 5000,
+  //     },
+  //   });
+
+  const sequelize = new Sequelize(process.env.DATABASE_URL, {
+    dialect: "postgres", // or any other dialect that your database uses
   });
 
   if (options.dialect === "mysql") {

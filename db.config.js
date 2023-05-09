@@ -1,5 +1,6 @@
 const { Sequelize, Model, DataTypes } = require("sequelize");
 const logger = require("../logger/api.logger");
+import mysql2 from "mysql2"; // Needed to fix sequelize issues with WebPack
 
 const connect = () => {
   const hostName = process.env.HOST;
@@ -10,7 +11,8 @@ const connect = () => {
 
   const sequelize = new Sequelize(database, userName, password, {
     host: hostName,
-    dialect: dialect,
+    dialect: "mysql",
+    dialectModule: mysql2,
     operatorsAliases: false,
     pool: {
       max: 10,

@@ -43,6 +43,11 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "images")));
 
 app.use(bodyParser.json());
+
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
+
 app.use("/api", appRoute);
 
 async function main() {

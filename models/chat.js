@@ -27,6 +27,8 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
   }
+
+  //
   Chat.init(
     {
       uuid: {

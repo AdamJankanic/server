@@ -8,10 +8,12 @@ const connect = () => {
   const password = process.env.PASSWORD;
   const database = process.env.DB;
   const dialect = process.env.DIALECT;
+  const port = process.env.PORT;
 
   const sequelize = new Sequelize(database, userName, password, {
     host: hostName,
     dialect: dialect,
+    port: port,
     operatorsAliases: false,
     pool: {
       max: 10,

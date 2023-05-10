@@ -47,6 +47,12 @@ router.get("/testik", (req, res) => {
   res.send("testik");
 });
 
+router.post("/testik", (req, res) => {
+  console.log(req.body);
+  //send body back
+  res.send(req.body);
+});
+
 /*chat*/
 // router.post("/chat/create", createChat);
 router.get("/chat/mychats/:uuid", checkToken, getAllChatsByUser);

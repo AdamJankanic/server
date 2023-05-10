@@ -59,7 +59,7 @@ async function main() {
 
 main();
 
-server.listen(PORT, (error) => {
+server.listen(PORT, "0.0.0.0", (error) => {
   if (!error)
     console.log(
       "Server is Successfully Running	and App is listening on port " + PORT

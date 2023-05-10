@@ -14,7 +14,7 @@ app.use(cookieParser());
 var PORT = process.env.PORT || 5000;
 
 const corsOptions = {
-  origin: "https://client-production-ab49.up.railway.app/",
+  origin: "https://client-production-ab49.up.railway.app",
   credentials: true,
 };
 

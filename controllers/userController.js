@@ -41,7 +41,7 @@ const login = async (req, res) => {
         email: emailInput,
       },
     });
-    return res.status(200).send(user);
+    // return res.status(200).send(user);
 
     if (user?.password === passwordInput) {
       if (!user.verified) {

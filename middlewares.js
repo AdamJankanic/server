@@ -40,32 +40,29 @@ async function checkEmailDupe(req, res, next) {
 //middleware to check if token is valid
 async function checkToken(req, res, next) {
   next();
-  try {
-    // next();
-    if (!req.headers.authorization) {
-      return res.status(401).json({
-        message: "Auth failed",
-      });
-    }
-
-    console.log("Headers are: ");
-    console.log(req.headers.authorization);
-
-    const token = req.headers.authorization.split(" ")[1];
-    // console.log(token.replace(/['"]+/g, ""));
-    const decoded = jwt.verify(
-      token.replace(/['"]+/g, ""),
-      process.env.MY_SECRET
-    );
-
-    next();
-  } catch (error) {
-    console.log("Error is: ");
-    console.log(error);
-    return res.status(401).json({
-      message: "Auth failed",
-    });
-  }
+  // try {
+  //   // next();
+  //   if (!req.headers.authorization) {
+  //     return res.status(401).json({
+  //       message: "Auth failed",
+  //     });
+  //   }
+  //   console.log("Headers are: ");
+  //   console.log(req.headers.authorization);
+  //   const token = req.headers.authorization.split(" ")[1];
+  //   // console.log(token.replace(/['"]+/g, ""));
+  //   const decoded = jwt.verify(
+  //     token.replace(/['"]+/g, ""),
+  //     process.env.MY_SECRET
+  //   );
+  //   next();
+  // } catch (error) {
+  //   console.log("Error is: ");
+  //   console.log(error);
+  //   return res.status(401).json({
+  //     message: "Auth failed",
+  //   });
+  // }
 }
 
 // async function allowCrossDomain(req, res, next) {

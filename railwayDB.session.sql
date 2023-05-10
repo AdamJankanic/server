@@ -1,0 +1,4 @@
+
+
+
+INSERT INTO messages VALUES ('6998e612-f33f-434e-8659-2dddba6c7f30', 'a7240cb3-b194-46f9-89b0-4bdec8bf92b9', '15dbe5bc-3645-4cbb-8ac0-0bd6c053d730', 'testovanie', '2023-05-09T09:44:33.710Z', '2023-05-09T09:44:33.710Z');

@@ -1,10 +1,11 @@
 {
   "development": {
     "username": "postgres",
-    "password": "fiitstu",
-    "database": "bakalarka",
-    "host": "127.0.0.1",
-    "dialect": "postgres"
+    "password": "k9JSNVxOF6mCPFy6KFZN",
+    "database": "railway",
+    "host": "containers-us-west-179.railway.app",
+    "dialect": "postgres",
+    "port": 6775
   },
   "test": {
     "username": "postgres",
@@ -15,10 +16,10 @@
   },
   "production": {
     "username": "postgres",
-    "password": "giX5EQ6zd1a3QiOpcYws",
+    "password": "k9JSNVxOF6mCPFy6KFZN",
     "database": "railway",
-    "host": "containers-us-west-1.railway.app",
+    "host": "containers-us-west-179.railway.app",
     "dialect": "postgres",
-    "port": 7828
+    "port": 6775
   }
 }

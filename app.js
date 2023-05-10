@@ -40,6 +40,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
+app.set("trust proxy", "loopback"); // specify a single subnet
 // access to images
 app.use(express.static(path.join(__dirname, "images")));
 

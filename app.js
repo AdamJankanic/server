@@ -32,7 +32,7 @@ const io = initializeWebSocket(server);
 var PORT = process.env.PORT || 5000;
 
 const corsOptions = {
-  origin: "*", //included origin as true
+  origin: "http://localhost:3000", //included origin as true
   credentials: true, //included credentials as true
 };
 

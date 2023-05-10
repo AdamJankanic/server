@@ -21,7 +21,7 @@ const {
 } = require("./websocket.js");
 // Initialize WebSocket
 
-// const io = initializeWebSocket(server);
+const io = initializeWebSocket(server);
 
 // io.on("connection", (socket) => {
 // console.log(`APP.JS User Connected: ${socket.id}`);

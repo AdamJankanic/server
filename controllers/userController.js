@@ -29,14 +29,14 @@ const verify = async (req, res) => {
 
 /* User login */
 const login = async (req, res) => {
-  return res.status(200).send("Login successful");
+  // return res.status(200).send("Login successful");
   try {
     // console.log(req.headers);
     console.log(req.body);
 
     const emailInput = req.body.email;
     const passwordInput = req.body.password;
-
+    return res.status(200).send(req.body.email, req.body.password);
     const user = await User.findOne({
       where: {
         email: emailInput,

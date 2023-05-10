@@ -34,7 +34,7 @@ const login = async (req, res) => {
     // console.log(req.headers);
     console.log(req.body);
 
-    return res.status(200).send(req.body);
+    return res.status(200).send(req.body.email);
     const emailInput = req.body.email;
     const passwordInput = req.body.password;
     const user = await User.findOne({

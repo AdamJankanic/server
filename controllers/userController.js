@@ -136,7 +136,7 @@ const refreshToken = async (req, res) => {
     // const refreshToken = req.body.refreshToken;
 
     if (!refreshToken) {
-      return res.status(400).send("Refresh token is not provided");
+      return res.status(400).send({ erorr: "Refresh token is not provided" });
     }
 
     //find user by refresh token

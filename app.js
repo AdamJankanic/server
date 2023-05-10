@@ -38,6 +38,13 @@ const corsOptions = {
 
 //cors options for cookies
 app.use(cors(corsOptions));
+app.use(function (req, res, next) {
+  res.setHeader(
+    "Access-Control-Allow-Origin",
+    "https://client-production-ab49.up.railway.app"
+  );
+  next();
+});
 app.use(express.json());
 
 app.set("trust proxy", "loopback"); // specify a single subnet

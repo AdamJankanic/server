@@ -45,7 +45,7 @@ app.use(express.static(path.join(__dirname, "images")));
 
 app.use(bodyParser.json());
 
-app.use("/", (req, res) => {
+app.use("/test", (req, res) => {
   res.send("Hello World!");
 });
 

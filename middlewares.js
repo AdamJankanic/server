@@ -40,6 +40,7 @@ async function checkEmailDupe(req, res, next) {
 //middleware to check if token is valid
 async function checkToken(req, res, next) {
   next();
+  //
   // try {
   //   // next();
   //   if (!req.headers.authorization) {

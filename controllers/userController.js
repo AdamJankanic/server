@@ -103,7 +103,10 @@ const login = async (req, res) => {
     console.log(error);
     return res
       .status(400)
-      .send("Email address or password is not correct (Problem with a login)");
+      .send(
+        "Email address or password is not correct (Problem with a login)",
+        error
+      );
   }
 };
 

@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 async function initializeWebSocket(server) {
   const io = new Server(server, {
     cors: {
-      origin: "*",
+      origin: "https://client-production-ab49.up.railway.app",
     },
   });
 

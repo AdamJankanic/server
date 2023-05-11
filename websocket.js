@@ -25,22 +25,31 @@ async function initializeWebSocket(server) {
       const { authorization } = socket.handshake.headers;
 
       if (authorization) {
-        // Token is present, handle it
-        const token = authorization.split(" ")[1];
-        console.log(
-          `User Connected : ${socket.id} to namespace /chat/${chatUuid}`
-        );
+        try {
+          // Token is present, handle it
+          const token = authorization.split(" ")[1];
+          console.log(
+            `User Connected : ${socket.id} to namespace /chat/${chatUuid}`
+          );
 
-        //decode token
-        const decoded = jwt.verify(
-          token.replace(/['"]+/g, ""),
-          process.env.MY_SECRET
-        );
-        console.log(decoded);
+          //decode token
+          const decoded = jwt.verify(
+            token.replace(/['"]+/g, ""),
+            process.env.MY_SECRET
+          );
+          console.log(decoded);
+        } catch (error) {
+          console.log(error);
+          if (error.name === "TokenExpiredError") {
+            // Token is expired
+            console.log("Token expired");
+          }
+          socket.disconnect();
+        }
       } else {
         // dont allow connection to namespace without token
         console.log("No token");
-        // socket.disconnect();
+        socket.disconnect();
       }
 
       socket.on("chatMessage", (message) => {

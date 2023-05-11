@@ -49,7 +49,7 @@ const login = async (req, res) => {
       }
 
       const token = jwt.sign({ uuid: user.uuid }, process.env.MY_SECRET, {
-        expiresIn: "15s",
+        expiresIn: "60s",
       });
 
       const decodedToken = jwt.decode(token);
@@ -158,7 +158,7 @@ const refreshToken = async (req, res) => {
     });
 
     const newToken = jwt.sign({ uuid: user.uuid }, process.env.MY_SECRET, {
-      expiresIn: "15s",
+      expiresIn: "60s",
     });
 
     const newRefreshToken = jwt.sign(

@@ -1,4 +1,5 @@
-const { Offer, Category } = require("../models");
+const { handleNewChat } = require("../websocket");
+const { Offer, Category, User_Chat, Chat } = require("../models");
 const fs = require("fs");
 
 /* Event offer */
@@ -17,25 +18,37 @@ const createOffer = async (req, res) => {
       "base64"
     );
 
-    fs.writeFile("./images/image.png", decodedImageData, (err) => {
-      if (err) {
-        console.error(err);
-      } else {
-        console.log('Image saved successfully as "image.png".');
+    const base64Header = /^data:(.+);base64,/;
+    // Extract the header from the base64 data
+    const headerMatch = req.body["image"].match(base64Header);
+    const imageType = headerMatch[1].split("/")[1];
+
+    //generate random name for image
+    const imageName =
+      Math.random().toString(36).substring(2, 15) +
+      Math.random().toString(36).substring(2, 15);
+    fs.writeFile(
+      `./public/images/${imageName}.${imageType}`,
+      decodedImageData,
+      (err) => {
+        if (err) {
+          console.error(err);
+        } else {
+          console.log("Image saved successfully");
+        }
       }
-    });
+    );
 
     const offer = await Offer.create({
       title: req.body.title,
       category: category.uuid,
       creator_uuid: req.body.creator_uuid,
       description: req.body.description,
-      capacity: req.body.capacity,
+      state: req.body.state,
       price: req.body.price,
       location: req.body.location,
-      time: req.body.time,
-      duration: req.body.duration,
-      date: req.body.date,
+      delivery: req.body.delivery,
+      // image: `http://localhost:5000/images/${imageName}.${imageType}`,
     });
 
     return res.status(200).json(offer);
@@ -61,16 +74,43 @@ const updateOffer = async (req, res) => {
         },
       });
 
-      const updatedOffer = await Offer.update({
+      if (req.body["image"]) {
+        const decodedImageData = Buffer.from(
+          req.body["image"].replace(/^data:image\/\w+;base64,/, ""),
+          "base64"
+        );
+
+        const base64Header = /^data:(.+);base64,/;
+        // Extract the header from the base64 data
+        const headerMatch = req.body["image"].match(base64Header);
+        const imageType = headerMatch[1].split("/")[1];
+
+        //generate random name for image
+        const imageName =
+          Math.random().toString(36).substring(2, 15) +
+          Math.random().toString(36).substring(2, 15);
+        fs.writeFile(
+          `./public/images/${imageName}.${imageType}`,
+          decodedImageData,
+          (err) => {
+            if (err) {
+              console.error(err);
+            } else {
+              console.log("Image saved successfully");
+            }
+          }
+        );
+      }
+
+      const updatedOffer = await offer.update({
         title: req.body.title,
         category: category.uuid,
         description: req.body.description,
-        capacity: req.body.capacity,
+        state: req.body.state,
         price: req.body.price,
         location: req.body.location,
-        time: req.body.time,
-        duration: req.body.duration,
-        date: req.body.date,
+        delivery: req.body.delivery,
+        image: offer.image,
       });
 
       return res.status(200).json(updatedOffer);
@@ -86,7 +126,9 @@ const updateOffer = async (req, res) => {
 /* Get all events */
 const getAllOffers = async (req, res) => {
   try {
-    const offers = await Offer.findAll();
+    const offers = await Offer.findAll({
+      include: [{ model: Category, attributes: ["name"] }],
+    });
     return res.status(200).json(offers);
   } catch (error) {
     console.log(error);
@@ -104,11 +146,28 @@ const getAllOffersByUser = async (req, res) => {
       where: {
         creator_uuid: user_uuid,
       },
+      include: [{ model: Category, attributes: ["name"] }],
     });
     return res.status(200).json(offers);
   } catch (error) {
     console.log(error);
     return res.status(400).send("Offers can not be found");
+  }
+};
+
+//get offer details
+const getOfferDetails = async (req, res) => {
+  try {
+    const offer = await Offer.findOne({
+      where: {
+        uuid: req.params.uuid,
+      },
+      include: [{ model: Category, attributes: ["name"] }],
+    });
+    return res.status(200).json(offer);
+  } catch (error) {
+    console.log(error);
+    return res.status(400).send("Offer can not be found");
   }
 };
 
@@ -122,6 +181,23 @@ const contactSeller = async (req, res) => {
     });
 
     if (offer) {
+      const chats = await Chat.findAll({
+        where: {
+          offer_uuid: offer.uuid,
+        },
+      });
+
+      const userChatExist = await User_Chat.findOne({
+        where: {
+          user_uuid: req.body.user_uuid,
+          chat_uuid: chats.map((chat) => chat.uuid),
+        },
+      });
+
+      if (userChatExist) {
+        return res.status(400).send("Chat already exists");
+      }
+
       const chat = await Chat.create({
         offer_uuid: offer.uuid,
       });
@@ -135,6 +211,11 @@ const contactSeller = async (req, res) => {
         user_uuid: offer.creator_uuid,
         chat_uuid: chat.uuid,
       });
+
+      const ioPromise = req.app.get("websocketIO");
+      const io = await ioPromise;
+      console.log("io", io);
+      handleNewChat(io, chat.uuid);
 
       return res.status(200).json(chat);
     } else {
@@ -153,4 +234,5 @@ module.exports = {
   getAllOffers,
   getAllOffersByUser,
   contactSeller,
+  getOfferDetails,
 };

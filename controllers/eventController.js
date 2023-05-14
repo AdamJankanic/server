@@ -1,4 +1,5 @@
 const { Event, Category, User_Chat, Chat } = require("../models");
+const { handleNewChat } = require("../websocket");
 
 /* Event create */
 const createEvent = async (req, res) => {
@@ -79,7 +80,21 @@ const updateEvent = async (req, res) => {
   }
 };
 
-/* Get all events */
+//get event details
+const getEventDetails = async (req, res) => {
+  try {
+    const event = await Event.findOne({
+      where: {
+        uuid: req.params.uuid,
+      },
+      include: [{ model: Category, attributes: ["name"] }],
+    });
+    return res.status(200).json(event);
+  } catch (error) {
+    console.log(error);
+    return res.status(400).send("Event can not be found");
+  }
+};
 
 //get all events
 const getAllEvents = async (req, res) => {
@@ -104,6 +119,7 @@ const getAllEventsByUser = async (req, res) => {
       where: {
         creator_uuid: user_uuid,
       },
+      include: [{ model: Category, attributes: ["name"] }],
     });
     return res.status(200).json(events);
   } catch (error) {
@@ -137,10 +153,10 @@ const joinEvent = async (req, res) => {
       });
 
       if (isInChat) {
-        return res.status(400).send("User is already in chat");
+        return res.status(204).send("User already joined");
       }
 
-      if (event.joined < event.capacity) {
+      if (event.joined < event.capacity || event.capacity === 0) {
         const joinedEvent = await event.update({
           joined: event.joined + 1,
         });
@@ -149,6 +165,11 @@ const joinEvent = async (req, res) => {
           user_uuid: req.body.user_uuid,
           chat_uuid: chat.uuid,
         });
+
+        const ioPromise = req.app.get("websocketIO");
+        const io = await ioPromise;
+        console.log("io", io);
+        handleNewChat(io, chat.uuid);
 
         return res.status(200).json(joinedEvent);
       } else {
@@ -170,4 +191,5 @@ module.exports = {
   getAllEvents,
   getAllEventsByUser,
   joinEvent,
+  getEventDetails,
 };

@@ -14,6 +14,7 @@ app.use(cookieParser());
 var PORT = process.env.PORT || 5000;
 
 const corsOptions = {
+  // origin: "http://127.0.0.1:3000",
   origin: "https://client-production-ab49.up.railway.app",
   credentials: true,
 };
@@ -24,7 +25,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 // access to images
-app.use(express.static(path.join(__dirname, "images")));
+app.use(express.static(path.join(__dirname, "public")));
 
 app.use(bodyParser.json());
 
@@ -33,20 +34,11 @@ app.use("/api", appRoute);
 /* web sockets */
 const http = require("http");
 const server = http.createServer(app);
-const {
-  initializeWebSocket,
-  handleJoinChat,
-  handleNewChat,
-} = require("./websocket.js");
+const { initializeWebSocket } = require("./websocket.js");
 // Initialize WebSocket
 
 const io = initializeWebSocket(server);
-
-// io.on("connection", (socket) => {
-// console.log(`APP.JS User Connected: ${socket.id}`);
-// handleJoinChat(socket, io);
-// handleNewChat(socket, io);
-// });
+app.set("websocketIO", io);
 
 async function main() {
   await sequelize.sync({ alter: true });

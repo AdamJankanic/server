@@ -19,6 +19,7 @@ const {
   getAllEvents,
   getAllEventsByUser,
   joinEvent,
+  getEventDetails,
 } = require("./controllers/eventController");
 
 const {
@@ -27,6 +28,7 @@ const {
   getAllOffers,
   getAllOffersByUser,
   contactSeller,
+  getOfferDetails,
 } = require("./controllers/offerController");
 
 const { createCategory } = require("./controllers/categoryController");
@@ -56,24 +58,28 @@ router.post("/testik", (req, res) => {
 /*chat*/
 // router.post("/chat/create", createChat);
 router.get("/chat/mychats/:uuid", checkToken, getAllChatsByUser);
-router.get("/chat/messages/:uuid", getAllMessagesByChat);
+router.get("/chat/messages/:uuid", checkToken, getAllMessagesByChat);
 // router.get("/chat/mychats/:uuid", getAllChatsByUser);
 
 /*event*/
 router.post("/event/create", checkToken, createEvent);
 router.put("/event/update", checkToken, updateEvent);
 router.get("/event/all", checkToken, getAllEvents);
+router.get("/event/detail/:uuid", checkToken, getEventDetails);
 // get all events by user in url
 router.get("/event/myevents/:uuid", checkToken, getAllEventsByUser);
 // router.get("/event/myevents", getAllEventsByUser);
 router.post("/event/join", checkToken, joinEvent);
+// router.post("/event/join", joinEvent);
 
 /*offer*/
 router.get("/offer/all", checkToken, getAllOffers);
 router.put("/offer/update", checkToken, updateOffer);
 router.post("/offer/create", checkToken, createOffer);
 router.get("/offer/myoffers/:uuid", checkToken, getAllOffersByUser);
+router.get("/offer/detail/:uuid", checkToken, getOfferDetails);
 router.post("/offer/contact", checkToken, contactSeller);
+// router.post("/offer/contact", contactSeller);
 
 /*category*/
 router.post("/category/create", createCategory);

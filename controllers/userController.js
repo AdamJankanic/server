@@ -76,6 +76,7 @@ const login = async (req, res) => {
         user_uuid: user.uuid,
       });
 
+      console.log("refresh token is: ", refreshToken);
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
         expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
@@ -113,6 +114,8 @@ const login = async (req, res) => {
 
 /* User logout */
 const logout = async (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+  console.log("refresh token is: ", refreshToken);
   try {
     // delete refresh token from database by user uuid
     Token.destroy({
@@ -134,7 +137,7 @@ const refreshToken = async (req, res) => {
     console.log("Starting refresh token");
     const refreshToken = req.cookies.refreshToken;
     // const refreshToken = req.body.refreshToken;
-
+    console.log("refresh token is: ", refreshToken);
     if (!refreshToken) {
       return res.status(400).send({ erorr: "Refresh token is not provided" });
     }

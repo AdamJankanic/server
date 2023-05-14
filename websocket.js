@@ -6,7 +6,7 @@ async function initializeWebSocket(server) {
   const io = new Server(server, {
     cors: {
       origin: "https://client-production-ab49.up.railway.app",
-      // origin: true,
+      // origin: "http://127.0.0.1:3000",
     },
   });
 

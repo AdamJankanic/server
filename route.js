@@ -33,51 +33,60 @@ const {
 
 const { createCategory } = require("./controllers/categoryController");
 
-const { checkEmailDupe, checkDomain, checkToken } = require("./middlewares");
+const {
+  checkEmailDupe,
+  checkDomain,
+  checkToken,
+  checkVerified,
+} = require("./middlewares");
 
 /* HTTP requests */
 
 /*user*/
-router.post("/user/create", checkDomain, checkEmailDupe, createUser);
-router.post("/user/signup", signup);
-router.post("/user/verify", verify);
+router.post("/user/verify", checkToken, verify);
 router.post("/user/login", login);
+router.post("/user/register", checkDomain, checkEmailDupe, createUser);
 router.get("/user/logout/:uuid", logout);
 router.get("/user/refresh", refreshToken);
 
-router.get("/testik", (req, res) => {
-  res.send("testik");
-});
-
-router.post("/testik", (req, res) => {
-  console.log(req.body);
-  //send body back
-  res.send(req.body);
-});
-
 /*chat*/
 // router.post("/chat/create", createChat);
-router.get("/chat/mychats/:uuid", checkToken, getAllChatsByUser);
-router.get("/chat/messages/:uuid", checkToken, getAllMessagesByChat);
+router.get("/chat/mychats/:uuid", checkToken, checkVerified, getAllChatsByUser);
+router.get(
+  "/chat/messages/:uuid",
+  checkToken,
+  checkVerified,
+  getAllMessagesByChat
+);
 // router.get("/chat/mychats/:uuid", getAllChatsByUser);
 
 /*event*/
 router.post("/event/create", checkToken, createEvent);
 router.put("/event/update", checkToken, updateEvent);
-router.get("/event/all", checkToken, getAllEvents);
-router.get("/event/detail/:uuid", checkToken, getEventDetails);
+router.get("/event/all", checkToken, checkVerified, getAllEvents);
+router.get("/event/detail/:uuid", checkToken, checkVerified, getEventDetails);
 // get all events by user in url
-router.get("/event/myevents/:uuid", checkToken, getAllEventsByUser);
+router.get(
+  "/event/myevents/:uuid",
+  checkToken,
+  checkVerified,
+  getAllEventsByUser
+);
 // router.get("/event/myevents", getAllEventsByUser);
 router.post("/event/join", checkToken, joinEvent);
 // router.post("/event/join", joinEvent);
 
 /*offer*/
-router.get("/offer/all", checkToken, getAllOffers);
+router.get("/offer/all", checkToken, checkVerified, getAllOffers);
 router.put("/offer/update", checkToken, updateOffer);
 router.post("/offer/create", checkToken, createOffer);
-router.get("/offer/myoffers/:uuid", checkToken, getAllOffersByUser);
-router.get("/offer/detail/:uuid", checkToken, getOfferDetails);
+router.get(
+  "/offer/myoffers/:uuid",
+  checkToken,
+  checkVerified,
+  getAllOffersByUser
+);
+router.get("/offer/detail/:uuid", checkToken, checkVerified, getOfferDetails);
 router.post("/offer/contact", checkToken, contactSeller);
 // router.post("/offer/contact", contactSeller);
 

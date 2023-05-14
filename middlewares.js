@@ -11,7 +11,7 @@ async function checkDomain(req, res, next) {
     if (domain === "stuba.sk") {
       return next();
     }
-    return res.status(400).send("Email is not from STU");
+    return res.status(432).send("Email is not from STU");
   } catch (error) {
     res.status(500).send({ message: error });
     return;
@@ -27,7 +27,7 @@ async function checkEmailDupe(req, res, next) {
       },
     });
     if (user) {
-      res.status(400).send("User already exists");
+      res.status(433).send("User already exists");
       return;
     }
     return next();
@@ -39,32 +39,58 @@ async function checkEmailDupe(req, res, next) {
 
 //middleware to check if token is valid
 async function checkToken(req, res, next) {
-  next();
-  //
-  // try {
-  //   // next();
-  //   if (!req.headers.authorization) {
-  //     return res.status(401).json({
-  //       message: "Auth failed",
-  //     });
-  //   }
-  //   console.log("Headers are: ");
-  //   console.log(req.headers.authorization);
-  //   const token = req.headers.authorization.split(" ")[1];
-  //   // console.log(token.replace(/['"]+/g, ""));
-  //   const decoded = jwt.verify(
-  //     token.replace(/['"]+/g, ""),
-  //     process.env.MY_SECRET
-  //   );
-  //   next();
-  // } catch (error) {
-  //   console.log("Error is: ");
-  //   console.log(error);
-  //   return res.status(401).json({
-  //     message: "Auth failed",
-  //   });
-  // }
+  try {
+    // next();
+    if (!req.headers.authorization) {
+      return res.status(401).json({
+        message: "Auth failed",
+      });
+    }
+    console.log("Headers are: ");
+    console.log(req.headers.authorization);
+    const token = req.headers.authorization.split(" ")[1];
+    // console.log(token.replace(/['"]+/g, ""));
+    const decoded = jwt.verify(
+      token.replace(/['"]+/g, ""),
+      process.env.MY_SECRET
+    );
+    next();
+  } catch (error) {
+    console.log("Error is: ");
+    console.log(error);
+    return res.status(401).json({
+      message: "Auth failed",
+    });
+  }
 }
+
+//check if user is verified
+const checkVerified = async (req, res, next) => {
+  try {
+    const token = req.headers.authorization.split(" ")[1];
+    const decoded = jwt.verify(
+      token.replace(/['"]+/g, ""),
+      process.env.MY_SECRET
+    );
+
+    const user = await User.findOne({
+      where: {
+        uuid: decoded.uuid,
+      },
+    });
+
+    if (user.verified) {
+      return next();
+    }
+    // return res.redirect("http://127.0.0.1:3000/verify");
+    return res.redirect("https://client-production-ab49.up.railway.app/verify");
+  } catch (error) {
+    console.log(error);
+    return res.status(401).json({
+      message: "Auth failed",
+    });
+  }
+};
 
 // async function allowCrossDomain(req, res, next) {
 //   res.header("Access-Control-Allow-Origin", "*");
@@ -77,5 +103,6 @@ module.exports = {
   checkEmailDupe,
   checkDomain,
   checkToken,
+  checkVerified,
   // allowCrossDomain,
 };

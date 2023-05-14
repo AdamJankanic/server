@@ -1,6 +1,7 @@
 const { User, Token } = require("../models");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
+const mg = require("nodemailer-mailgun-transport");
 const { param } = require("../route");
 
 const dotenv = require("dotenv").config();
@@ -8,9 +9,16 @@ const dotenv = require("dotenv").config();
 const verify = async (req, res) => {
   try {
     const verificationCode = req.body.verification_code;
+    const token = req.headers.authorization.split(" ")[1];
+    const decoded = jwt.verify(
+      token.replace(/['"]+/g, ""),
+      process.env.MY_SECRET
+    );
+    console.log("decoded is: ", decoded.uuid);
+
     const user = await User.findOne({
       where: {
-        uuid: req.body.uuid,
+        uuid: decoded.uuid,
       },
     });
 
@@ -44,10 +52,6 @@ const login = async (req, res) => {
     // return res.status(200).send(user);
 
     if (user?.password === passwordInput) {
-      if (!user.verified) {
-        return res.status(400).send("Verification is needed");
-      }
-
       const token = jwt.sign({ uuid: user.uuid }, process.env.MY_SECRET, {
         expiresIn: "60s",
       });
@@ -80,8 +84,6 @@ const login = async (req, res) => {
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
         expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-        sameSite: "none",
-        secure: true,
       });
 
       const responseToUser = {
@@ -219,12 +221,19 @@ const createUser = async (req, res) => {
     // add zeros until it is 6 digits long
     code.toString().padStart(6, "0");
 
-    const user = await User.create({
+    // const user = await User.create({
+    //   username: req.body.username,
+    //   email: req.body.email,
+    //   password: req.body.password,
+    //   verification_code: code,
+    // });
+
+    const user = {
       username: req.body.username,
       email: req.body.email,
       password: req.body.password,
       verification_code: code,
-    });
+    };
 
     if (user) sendVerifiactioCode("xjankanic@stuba.sk", code);
 
@@ -236,28 +245,38 @@ const createUser = async (req, res) => {
 };
 
 function sendVerifiactioCode(emailTo, code) {
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
+  // const transporter = nodemailer.createTransport({
+  //   service: "gmail",
+  //   auth: {
+  //     type: "OAuth2",
+  //     user: process.env.EMAIL,
+  //     pass: process.env.EMAIL_PASSWORD,
+  //     clientId: process.env.EMAIL_CLIENT_ID,
+  //     clientSecret: process.env.EMAIL_CLIENT_SECRET,
+  //     refreshToken: process.env.REFRESH_TOKEN,
+  //   },
+  // });
+
+  const mailgunAuth = {
     auth: {
-      type: "OAuth2",
-      user: process.env.EMAIL,
-      pass: process.env.EMAIL_PASSWORD,
-      clientId: process.env.EMAIL_CLIENT_ID,
-      clientSecret: process.env.EMAIL_CLIENT_SECRET,
-      refreshToken: process.env.REFRESH_TOKEN,
+      api_key: process.env.MAILGUN_API_KEY,
+      domain: process.env.MAILGUN_DOMAIN,
     },
-  });
+  };
+
+  const smtpTransport = nodemailer.createTransport(mg(mailgunAuth));
 
   const mailOptions = {
-    from: process.env.EMAIL,
+    // from: process.env.EMAIL,
+    from: "adamjankanic@gmail.com",
     to: emailTo,
     subject: "Verification code",
     text: "Verification code is: " + code,
   };
 
-  transporter.sendMail(mailOptions, function (error, info) {
+  smtpTransport.sendMail(mailOptions, function (error, info) {
     if (error) {
-      console.log(error);
+      console.log("error: ", error);
     } else {
       console.log("Email sent: " + info.response);
     }

@@ -17,7 +17,7 @@ const corsOptions = {
   // origin: "http://127.0.0.1:3000",
   origin: [
     "https://client-production-ab49.up.railway.app",
-    "https://client-production-ab49.up.railway.app/",
+    "https://client-production-ab49.up.railway.app/verify",
   ],
   credentials: true,
 };

@@ -83,12 +83,10 @@ const checkVerified = async (req, res, next) => {
       return next();
     }
     // return res.redirect("http://127.0.0.1:3000/verify");
-    res.set(
-      "Access-Control-Allow-Origin",
-      "https://client-production-ab49.up.railway.app"
-    );
-    res.set("Access-Control-Allow-Credentials", "true");
-    return res.redirect("https://client-production-ab49.up.railway.app/verify");
+
+    return res.status(434).json({
+      message: "User is not verified",
+    });
   } catch (error) {
     console.log(error);
     return res.status(401).json({

@@ -25,7 +25,8 @@ const verify = async (req, res) => {
     if (user.verification_code === verificationCode) {
       user.verified = true;
       user.save();
-      return res.status(200).send("User verified");
+      // return res.status(200).send("User verified");
+      res.redirect("https://client-production-ab49.up.railway.app/");
     } else {
       return res.status(400).send("Verification code is not correct");
     }

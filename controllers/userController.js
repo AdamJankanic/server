@@ -8,7 +8,7 @@ const dotenv = require("dotenv").config();
 /* User verify */
 const verify = async (req, res) => {
   try {
-    const verificationCode = req.body.verification_code;
+    const verificationCode = req.body.verificationCode;
     const token = req.headers.authorization.split(" ")[1];
     const decoded = jwt.verify(
       token.replace(/['"]+/g, ""),

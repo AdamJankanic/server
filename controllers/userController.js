@@ -222,19 +222,19 @@ const createUser = async (req, res) => {
     // add zeros until it is 6 digits long
     code.toString().padStart(6, "0");
 
-    // const user = await User.create({
-    //   username: req.body.username,
-    //   email: req.body.email,
-    //   password: req.body.password,
-    //   verification_code: code,
-    // });
-
-    const user = {
+    const user = await User.create({
       username: req.body.username,
       email: req.body.email,
       password: req.body.password,
       verification_code: code,
-    };
+    });
+
+    // const user = {
+    //   username: req.body.username,
+    //   email: req.body.email,
+    //   password: req.body.password,
+    //   verification_code: code,
+    // };
 
     if (user) sendVerifiactioCode("xjankanic@stuba.sk", code);
 

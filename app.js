@@ -4,6 +4,7 @@ const cors = require("cors");
 const app = express();
 const path = require("path");
 const cookieParser = require("cookie-parser");
+const fs = require("fs");
 
 const bodyParser = require("body-parser");
 const { sequelize } = require("./models");

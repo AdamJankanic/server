@@ -79,7 +79,7 @@ router.post("/event/join", checkToken, joinEvent);
 /*offer*/
 router.get("/offer/all", checkToken, checkVerified, getAllOffers);
 router.put("/offer/update", checkToken, updateOffer);
-router.post("/offer/create", checkToken, createOffer);
+router.post("/offer/create", createOffer);
 router.get(
   "/offer/myoffers/:uuid",
   checkToken,

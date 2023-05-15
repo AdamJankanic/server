@@ -39,6 +39,21 @@ const createOffer = async (req, res) => {
       }
     );
 
+    const imagePath = `./public/images/${imageName}.${imageType}`;
+    fs.exists(imagePath, (exists) => {
+      if (exists) {
+        console.log("File already exists");
+      } else {
+        fs.writeFile(imagePath, decodedImageData, (err) => {
+          if (err) {
+            console.error(err);
+          } else {
+            console.log("Image saved successfully");
+          }
+        });
+      }
+    });
+
     const offer = await Offer.create({
       title: req.body.title,
       category: category.uuid,

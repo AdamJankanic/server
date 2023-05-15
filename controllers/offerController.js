@@ -48,7 +48,7 @@ const createOffer = async (req, res) => {
       price: req.body.price,
       location: req.body.location,
       delivery: req.body.delivery,
-      image: `https://client-production-ab49.up.railway.app/images/${imageName}.${imageType}`,
+      image: `https://server-production-412a.up.railway.app/images/${imageName}.${imageType}`,
     });
 
     return res.status(200).json(offer);

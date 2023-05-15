@@ -30,6 +30,29 @@ app.use(express.json());
 // access to images
 app.use(express.static(path.join(__dirname, "public")));
 
+app.get("/images", (req, res) => {
+  // Read the "public/images" directory and get the list of files
+  const imageDir = path.join(__dirname, "public/images");
+  fs.readdir(imageDir, (err, files) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: "Failed to retrieve images" });
+    }
+
+    // Filter out non-image files (if needed)
+    const imageFiles = files.filter((file) => {
+      const fileExtension = path.extname(file).toLowerCase();
+      return [".jpg", ".jpeg", ".png", ".gif"].includes(fileExtension);
+    });
+
+    // Create an array of image URLs
+    const imageUrls = imageFiles.map((file) => `/images/${file}`);
+
+    // Send the image URLs as a response
+    res.json({ images: imageUrls });
+  });
+});
+
 app.use(bodyParser.json());
 
 app.use("/api", appRoute);

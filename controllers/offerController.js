@@ -23,7 +23,7 @@ const createOffer = async (req, res) => {
     const headerMatch = req.body["image"].match(base64Header);
     const imageType = headerMatch[1].split("/")[1];
 
-    //generate random name for image
+    // generate random name for image
     const imageName =
       Math.random().toString(36).substring(2, 15) +
       Math.random().toString(36).substring(2, 15);

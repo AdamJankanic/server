@@ -2,6 +2,8 @@ const { Server } = require("socket.io");
 const { User, Chat, User_Chat, Message } = require("./models");
 const jwt = require("jsonwebtoken");
 
+const messageQueue = {};
+
 async function initializeWebSocket(server) {
   const io = new Server(server, {
     cors: {
@@ -62,19 +64,22 @@ async function initializeWebSocket(server) {
         console.log("Message received:", message);
         // console log namespaced socket id
 
-        const namespace = socket.nsp.name;
-        const chatUUID = namespace.split("/")[2];
+        if (!messageQueue[message.id]) {
+          const namespace = socket.nsp.name;
+          const chatUUID = namespace.split("/")[2];
 
-        console.log("namespace: ", chatUUID);
+          console.log("namespace: ", chatUUID);
 
-        // save message to database
-        Message.create({
-          sender_uuid: message.sender_uuid,
-          chat_uuid: chatUUID,
-          content: message.content,
-        });
+          // save message to database
+          Message.create({
+            sender_uuid: message.sender_uuid,
+            chat_uuid: chatUUID,
+            content: message.content,
+          });
 
-        socket.broadcast.emit("receive_message", message);
+          messageQueue[message.id] = true;
+          socket.broadcast.emit("receive_message", message);
+        }
       });
 
       socket.on("disconnect", () => {

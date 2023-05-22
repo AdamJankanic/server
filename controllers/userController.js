@@ -55,7 +55,7 @@ const login = async (req, res) => {
 
     let passwordMatch = false;
 
-    bcrypt.compare(plainPassword, user?.password, (err, result) => {
+    bcrypt.compare(passwordInput, user?.password, async (err, result) => {
       if (err) {
         console.error("Error while comparing passwords:", err);
         return;
@@ -64,67 +64,116 @@ const login = async (req, res) => {
       if (result) {
         // Passwords match
         console.log("Login successful");
-        passwordMatch = true;
+        const token = jwt.sign({ uuid: user.uuid }, process.env.MY_SECRET, {
+          expiresIn: "3h",
+        });
+
+        const decodedToken = jwt.decode(token);
+        const tokenExpiry = decodedToken.exp;
+
+        const tokenExpirationDate = new Date();
+
+        const refreshToken = jwt.sign(
+          { uuid: user.uuid },
+          process.env.MY_SECRET,
+          {
+            expiresIn: "3d",
+          }
+        );
+
+        const decodedRefresh = jwt.decode(refreshToken);
+        const refreshExpiry = decodedRefresh.exp;
+
+        const refreshExpirationDate = new Date();
+
+        // console.log(token);
+        const refresh = await Token.create({
+          token: refreshToken,
+          user_uuid: user.uuid,
+        });
+
+        console.log("refresh token is: ", refreshToken);
+        res.cookie("refreshToken", refreshToken, {
+          httpOnly: true,
+          expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+        });
+
+        const responseToUser = {
+          token: {
+            token: token,
+            expiration: tokenExpiry,
+            refreshExpiration: refreshExpiry,
+          },
+          user: {
+            uuid: user.uuid,
+            email: user.email,
+            username: user.username,
+            verified: user.verified,
+          },
+        };
+
+        return res.status(200).json(responseToUser);
       } else {
         // Passwords don't match
         console.log("Invalid login");
         passwordMatch = false;
+        return res.status(400).send("Email address or password is not correct");
       }
     });
 
-    if (passwordMatch) {
-      const token = jwt.sign({ uuid: user.uuid }, process.env.MY_SECRET, {
-        expiresIn: "3h",
-      });
+    // if (passwordMatch) {
+    //   const token = jwt.sign({ uuid: user.uuid }, process.env.MY_SECRET, {
+    //     expiresIn: "3h",
+    //   });
 
-      const decodedToken = jwt.decode(token);
-      const tokenExpiry = decodedToken.exp;
+    //   const decodedToken = jwt.decode(token);
+    //   const tokenExpiry = decodedToken.exp;
 
-      const tokenExpirationDate = new Date();
+    //   const tokenExpirationDate = new Date();
 
-      const refreshToken = jwt.sign(
-        { uuid: user.uuid },
-        process.env.MY_SECRET,
-        {
-          expiresIn: "3d",
-        }
-      );
+    //   const refreshToken = jwt.sign(
+    //     { uuid: user.uuid },
+    //     process.env.MY_SECRET,
+    //     {
+    //       expiresIn: "3d",
+    //     }
+    //   );
 
-      const decodedRefresh = jwt.decode(refreshToken);
-      const refreshExpiry = decodedRefresh.exp;
+    //   const decodedRefresh = jwt.decode(refreshToken);
+    //   const refreshExpiry = decodedRefresh.exp;
 
-      const refreshExpirationDate = new Date();
+    //   const refreshExpirationDate = new Date();
 
-      // console.log(token);
-      const refresh = await Token.create({
-        token: refreshToken,
-        user_uuid: user.uuid,
-      });
+    //   // console.log(token);
+    //   const refresh = await Token.create({
+    //     token: refreshToken,
+    //     user_uuid: user.uuid,
+    //   });
 
-      console.log("refresh token is: ", refreshToken);
-      res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-      });
+    //   console.log("refresh token is: ", refreshToken);
+    //   res.cookie("refreshToken", refreshToken, {
+    //     httpOnly: true,
+    //     expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+    //   });
 
-      const responseToUser = {
-        token: {
-          token: token,
-          expiration: tokenExpiry,
-          refreshExpiration: refreshExpiry,
-        },
-        user: {
-          uuid: user.uuid,
-          email: user.email,
-          username: user.username,
-          verified: user.verified,
-        },
-      };
+    //   const responseToUser = {
+    //     token: {
+    //       token: token,
+    //       expiration: tokenExpiry,
+    //       refreshExpiration: refreshExpiry,
+    //     },
+    //     user: {
+    //       uuid: user.uuid,
+    //       email: user.email,
+    //       username: user.username,
+    //       verified: user.verified,
+    //     },
+    //   };
 
-      return res.status(200).json(responseToUser);
-    } else {
-      return res.status(400).send("Email address or password is not correct");
-    }
+    //   return res.status(200).json(responseToUser);
+    // } else {
+    //   return res.status(400).send("Email address or password is not correct");
+    // }
   } catch (error) {
     console.log("Error is: ");
     console.log(error);
@@ -243,30 +292,15 @@ const createUser = async (req, res) => {
     code.toString().padStart(6, "0");
 
     const plainPassword = req.body.password;
-    let securePassword = "";
-    bcrypt.genSalt(10, (err, salt) => {
-      if (err) {
-        console.error("Error while generating salt:", err);
-        return;
-      }
 
-      // Hash the password using the generated salt
-      bcrypt.hash(plainPassword, salt, (err, hashedPassword) => {
-        if (err) {
-          console.error("Error while hashing password:", err);
-          return;
-        }
-
-        // Store the hashed password in the database
-        console.log("Hashed Password:", hashedPassword);
-        securePassword = hashedPassword;
-      });
-    });
+    const saltRounds = 10;
+    const salt = await bcrypt.genSalt(saltRounds);
+    const hashedPassword = await bcrypt.hash(req.body.password, salt);
 
     const user = await User.create({
       username: req.body.username,
       email: req.body.email,
-      password: securePassword,
+      password: hashedPassword,
       verification_code: code,
     });
 

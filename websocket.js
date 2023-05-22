@@ -79,8 +79,9 @@ async function initializeWebSocket(server) {
 
           const newMessage = {
             content: message.content,
+            sender_uuid: message.sender_uuid,
             User: {
-              username: "JANO",
+              username: message.User.username,
             },
             createdAt: new Date(),
           };

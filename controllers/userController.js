@@ -236,7 +236,7 @@ const createUser = async (req, res) => {
     //   verification_code: code,
     // };
 
-    if (user) sendVerifiactioCode("xjankanic@stuba.sk", code);
+    if (user) sendVerifiactioCode(req.body.email, code);
 
     return res.status(200).json(user);
   } catch (error) {

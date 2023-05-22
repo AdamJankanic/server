@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const mg = require("nodemailer-mailgun-transport");
 const { param } = require("../route");
+const bcrypt = require("bcrypt");
 
 const dotenv = require("dotenv").config();
 /* User verify */
@@ -52,7 +53,26 @@ const login = async (req, res) => {
     });
     // return res.status(200).send(user);
 
-    if (user?.password === passwordInput) {
+    let passwordMatch = false;
+
+    bcrypt.compare(plainPassword, user?.password, (err, result) => {
+      if (err) {
+        console.error("Error while comparing passwords:", err);
+        return;
+      }
+
+      if (result) {
+        // Passwords match
+        console.log("Login successful");
+        passwordMatch = true;
+      } else {
+        // Passwords don't match
+        console.log("Invalid login");
+        passwordMatch = false;
+      }
+    });
+
+    if (passwordMatch) {
       const token = jwt.sign({ uuid: user.uuid }, process.env.MY_SECRET, {
         expiresIn: "3h",
       });
@@ -222,19 +242,33 @@ const createUser = async (req, res) => {
     // add zeros until it is 6 digits long
     code.toString().padStart(6, "0");
 
+    const plainPassword = req.body.password;
+    let securePassword = "";
+    bcrypt.genSalt(10, (err, salt) => {
+      if (err) {
+        console.error("Error while generating salt:", err);
+        return;
+      }
+
+      // Hash the password using the generated salt
+      bcrypt.hash(plainPassword, salt, (err, hashedPassword) => {
+        if (err) {
+          console.error("Error while hashing password:", err);
+          return;
+        }
+
+        // Store the hashed password in the database
+        console.log("Hashed Password:", hashedPassword);
+        securePassword = hashedPassword;
+      });
+    });
+
     const user = await User.create({
       username: req.body.username,
       email: req.body.email,
-      password: req.body.password,
+      password: securePassword,
       verification_code: code,
     });
-
-    // const user = {
-    //   username: req.body.username,
-    //   email: req.body.email,
-    //   password: req.body.password,
-    //   verification_code: code,
-    // };
 
     if (user) sendVerifiactioCode(req.body.email, code);
 

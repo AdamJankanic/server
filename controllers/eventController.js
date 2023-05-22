@@ -1,6 +1,6 @@
-const { Event, Category, User_Chat, Chat } = require("../models");
+const { Event, Category, User_Chat, Chat, Message } = require("../models");
 const { handleNewChat } = require("../websocket");
-
+const { Op } = require("sequelize");
 /* Event create */
 const createEvent = async (req, res) => {
   try {
@@ -128,6 +128,47 @@ const getAllEventsByUser = async (req, res) => {
   }
 };
 
+//get events joined by user
+const getAllEventsJoinedByUser = async (req, res) => {
+  try {
+    //user uuid from url
+    const user_uuid = req.params.uuid;
+
+    //get all chat_uuid from user_chat table where user_uuid = user_uuid from url
+    const chats = await User_Chat.findAll({
+      attributes: ["chat_uuid"],
+      where: {
+        user_uuid: user_uuid,
+      },
+    });
+
+    const chatUuids = chats.map((chat) => chat.chat_uuid);
+
+    //get all chats from chat table where chat_uuid = chat_uuid from user_chat table
+    const allChats = await Chat.findAll({
+      where: {
+        uuid: chatUuids,
+      },
+    });
+
+    //get all events from event table where event_uuid = event_uuid from chat table and user is not creator
+    const events = await Event.findAll({
+      where: {
+        uuid: allChats.map((chat) => chat.event_uuid),
+        creator_uuid: {
+          [Op.not]: user_uuid,
+        },
+      },
+      include: [{ model: Category, attributes: ["name"] }],
+    });
+
+    return res.status(200).json(events);
+  } catch (error) {
+    console.log(error);
+    return res.status(400).send("Events can not be found");
+  }
+};
+
 // join event by user
 const joinEvent = async (req, res) => {
   try {
@@ -184,6 +225,94 @@ const joinEvent = async (req, res) => {
   }
 };
 
+//delete event
+const deleteEvent = async (req, res) => {
+  try {
+    const event = await Event.findOne({
+      where: {
+        uuid: req.params.uuid,
+      },
+    });
+
+    if (event) {
+      //delete chat from chat table where event_uuid = event_uuid from url
+
+      const chats = await Chat.findAll({
+        where: {
+          event_uuid: event.uuid,
+        },
+      });
+
+      const chatUuids = chats.map((chat) => chat.uuid);
+
+      const userChats = await User_Chat.destroy({
+        where: {
+          chat_uuid: chatUuids,
+        },
+      });
+
+      const deletedChats = await Chat.destroy({
+        where: {
+          uuid: chatUuids,
+        },
+      });
+
+      const messages = await Message.destroy({
+        where: {
+          chat_uuid: chatUuids,
+        },
+      });
+
+      const deletedEvent = await event.destroy();
+      return res.status(200).json(deletedEvent);
+    } else {
+      return res.status(400).send("Event not found");
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(400).send("Event can not be deleted");
+  }
+};
+
+const leaveEvent = async (req, res) => {
+  try {
+    console.log("req.body", req.body);
+    const event = await Event.findOne({
+      where: {
+        uuid: req.body.event_uuid,
+      },
+    });
+
+    if (event) {
+      console.log("event", event);
+      const chat = await Chat.findOne({
+        where: {
+          event_uuid: event.uuid,
+        },
+      });
+
+      console.log("chat", chat);
+      const userChat = await User_Chat.destroy({
+        where: {
+          user_uuid: req.body.user_uuid,
+          chat_uuid: chat.uuid,
+        },
+      });
+
+      const leftEvent = await event.update({
+        joined: event.joined - 1,
+      });
+
+      return res.status(200).json(leftEvent);
+    } else {
+      return res.status(400).send("Event not found");
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(400).send("Event can not be left");
+  }
+};
+
 /* export */
 module.exports = {
   createEvent,
@@ -192,4 +321,7 @@ module.exports = {
   getAllEventsByUser,
   joinEvent,
   getEventDetails,
+  getAllEventsJoinedByUser,
+  deleteEvent,
+  leaveEvent,
 };

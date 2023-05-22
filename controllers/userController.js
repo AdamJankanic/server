@@ -54,7 +54,7 @@ const login = async (req, res) => {
 
     if (user?.password === passwordInput) {
       const token = jwt.sign({ uuid: user.uuid }, process.env.MY_SECRET, {
-        expiresIn: "60s",
+        expiresIn: "3h",
       });
 
       const decodedToken = jwt.decode(token);
@@ -166,7 +166,7 @@ const refreshToken = async (req, res) => {
     });
 
     const newToken = jwt.sign({ uuid: user.uuid }, process.env.MY_SECRET, {
-      expiresIn: "60s",
+      expiresIn: "3h",
     });
 
     const newRefreshToken = jwt.sign(

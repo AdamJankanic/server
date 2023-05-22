@@ -1,6 +1,7 @@
 const { handleNewChat } = require("../websocket");
-const { Offer, Category, User_Chat, Chat } = require("../models");
+const { Offer, Category, User_Chat, Chat, Message } = require("../models");
 const fs = require("fs");
+const { Op } = require("sequelize");
 
 /* Event offer */
 const createOffer = async (req, res) => {
@@ -210,7 +211,7 @@ const contactSeller = async (req, res) => {
       });
 
       if (userChatExist) {
-        return res.status(400).send("Chat already exists");
+        return res.status(435).send("Chat already exists");
       }
 
       const chat = await Chat.create({
@@ -242,6 +243,139 @@ const contactSeller = async (req, res) => {
   }
 };
 
+//get offers to which user contacted seller
+const getAllOffersByUserContacted = async (req, res) => {
+  try {
+    //user uuid from url
+    const user_uuid = req.params.uuid;
+
+    //get all chat_uuid from user_chat table where user_uuid = user_uuid from url
+    const chats = await User_Chat.findAll({
+      attributes: ["chat_uuid"],
+      where: {
+        user_uuid: user_uuid,
+      },
+    });
+
+    const chatUuids = chats.map((chat) => chat.chat_uuid);
+
+    //get all chats from chat table where chat_uuid = chat_uuid from user_chat table
+    const allChats = await Chat.findAll({
+      where: {
+        uuid: chatUuids,
+      },
+    });
+
+    const offerUuids = allChats.map((chat) => chat.offer_uuid);
+
+    const offers = await Offer.findAll({
+      where: {
+        uuid: offerUuids,
+
+        creator_uuid: {
+          [Op.not]: user_uuid,
+        },
+      },
+      include: [{ model: Category, attributes: ["name"] }],
+    });
+
+    return res.status(200).json(offers);
+  } catch (error) {
+    console.log(error);
+    return res.status(400).send("Offers can not be found");
+  }
+};
+
+const deleteOffer = async (req, res) => {
+  try {
+    const offer = await Offer.findOne({
+      where: {
+        uuid: req.params.uuid,
+      },
+    });
+
+    if (offer) {
+      //delete all chats related to offer
+      const chats = await Chat.findAll({
+        where: {
+          offer_uuid: offer.uuid,
+        },
+      });
+
+      const chatUuids = chats.map((chat) => chat.uuid);
+
+      const userChats = await User_Chat.destroy({
+        where: {
+          chat_uuid: chatUuids,
+        },
+      });
+
+      const chatDestroy = await Chat.destroy({
+        where: {
+          uuid: chatUuids,
+        },
+      });
+
+      const messages = await Message.destroy({
+        where: {
+          chat_uuid: chatUuids,
+        },
+      });
+
+      await offer.destroy();
+      return res.status(200).send("Offer deleted");
+    } else {
+      return res.status(400).send("Offer not found");
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(400).send("Offer can not be deleted");
+  }
+};
+
+const leaveOffer = async (req, res) => {
+  try {
+    const offer = await Offer.findOne({
+      where: {
+        uuid: req.body.offer_uuid,
+      },
+    });
+
+    if (offer) {
+      const chats = await Chat.findAll({
+        where: {
+          offer_uuid: offer.uuid,
+        },
+      });
+
+      const chatUuids = chats.map((chat) => chat.uuid);
+
+      //find chat where user_uuid is from body and offer_uuid is from body
+      const userChatUUID = await User_Chat.findOne({
+        attributes: ["chat_uuid"],
+        where: {
+          user_uuid: req.body.user_uuid,
+          chat_uuid: chatUuids,
+        },
+      });
+
+      //delete chats where user_uuid is from body and offer_uuid is from body and seller
+      const sellerChat = await User_Chat.destroy({
+        where: {
+          chat_uuid: userChatUUID.chat_uuid,
+        },
+      });
+
+      return res.status(200).send("Offer left");
+    } else {
+      return res.status(400).send("Offer not found");
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(400).send("Offer can not be left");
+  }
+};
+
 /* export */
 module.exports = {
   createOffer,
@@ -250,4 +384,7 @@ module.exports = {
   getAllOffersByUser,
   contactSeller,
   getOfferDetails,
+  getAllOffersByUserContacted,
+  deleteOffer,
+  leaveOffer,
 };

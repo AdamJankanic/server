@@ -1,4 +1,4 @@
-const { Chat, User_Chat, Event, Offer, Message } = require("../models");
+const { Chat, User_Chat, Event, Offer, Message, User } = require("../models");
 
 /* Chat create */
 const createChat = async (req, res) => {
@@ -61,7 +61,15 @@ const getAllMessagesByChat = async (req, res) => {
       where: {
         chat_uuid: chat_uuid,
       },
+      include: [
+        {
+          model: User,
+          attributes: ["username"],
+        },
+      ],
     });
+
+    console.log("messages are: ", messages);
 
     return res.status(200).json(messages);
   } catch (error) {

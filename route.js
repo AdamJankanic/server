@@ -20,6 +20,9 @@ const {
   getAllEventsByUser,
   joinEvent,
   getEventDetails,
+  getAllEventsJoinedByUser,
+  deleteEvent,
+  leaveEvent,
 } = require("./controllers/eventController");
 
 const {
@@ -29,6 +32,9 @@ const {
   getAllOffersByUser,
   contactSeller,
   getOfferDetails,
+  getAllOffersByUserContacted,
+  deleteOffer,
+  leaveOffer,
 } = require("./controllers/offerController");
 
 const { createCategory } = require("./controllers/categoryController");
@@ -72,9 +78,17 @@ router.get(
   checkVerified,
   getAllEventsByUser
 );
+router.get(
+  "/event/joined/:uuid",
+  checkToken,
+  checkVerified,
+  getAllEventsJoinedByUser
+);
 // router.get("/event/myevents", getAllEventsByUser);
 router.post("/event/join", checkToken, joinEvent);
 // router.post("/event/join", joinEvent);
+router.delete("/event/delete/:uuid", checkToken, deleteEvent);
+router.post("/event/leave", checkToken, leaveEvent);
 
 /*offer*/
 router.get("/offer/all", checkToken, checkVerified, getAllOffers);
@@ -86,8 +100,17 @@ router.get(
   checkVerified,
   getAllOffersByUser
 );
+router.get(
+  "/offer/contacted/:uuid",
+  checkToken,
+  checkVerified,
+  getAllOffersByUserContacted
+);
 router.get("/offer/detail/:uuid", checkToken, checkVerified, getOfferDetails);
 router.post("/offer/contact", checkToken, contactSeller);
+router.delete("/offer/delete/:uuid", checkToken, deleteOffer);
+router.post("/offer/leave", checkToken, leaveOffer);
+
 // router.post("/offer/contact", contactSeller);
 
 /*category*/

@@ -77,8 +77,16 @@ async function initializeWebSocket(server) {
             content: message.content,
           });
 
+          const newMessage = {
+            content: message.content,
+            User: {
+              username: "JANO",
+            },
+            createdAt: new Date(),
+          };
+
           messageQueue[message.id] = true;
-          socket.broadcast.emit("receive_message", message);
+          socket.broadcast.emit("receive_message", newMessage);
         }
       });
 
@@ -153,7 +161,14 @@ function handleNewChat(io, chat_uuid) {
   });
 }
 
+//close namespace when chat is deleted
+function closeNamespace(io, chat_uuid) {
+  const chatNamespace = io.of(`/chat/${chat_uuid}`);
+  chatNamespace.close();
+}
+
 module.exports = {
   initializeWebSocket,
   handleNewChat,
+  closeNamespace,
 };
